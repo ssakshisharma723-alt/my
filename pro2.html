@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OS Process Scheduler Visualizer</title>
+
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:#0f172a;
+      color:white;
+      min-height:100vh;
+      padding:40px 20px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .container{
+      width:100%;
+      max-width:1200px;
+    }
+
+    /* CARD */
+
+    .project-card{
+      background:#111827;
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 15px 40px rgba(0,0,0,0.4);
+    }
+
+    .project-header{
+      height:150px;
+      background:linear-gradient(135deg,#7c3aed,#ec4899);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+
+    .project-icon{
+      font-size:65px;
+      color:white;
+    }
+
+    .project-body{
+      padding:30px;
+    }
+
+    .project-tags{
+      display:flex;
+      gap:10px;
+      margin-bottom:15px;
+      flex-wrap:wrap;
+    }
+
+    .tag{
+      background:#1e293b;
+      color:#38bdf8;
+      padding:6px 12px;
+      border-radius:20px;
+      font-size:13px;
+    }
+
+    .project-title{
+      font-size:30px;
+      margin-bottom:10px;
+    }
+
+    .project-desc{
+      color:#cbd5e1;
+      line-height:1.6;
+      margin-bottom:25px;
+    }
+
+    .project-links{
+      display:flex;
+      gap:15px;
+      margin-bottom:30px;
+      flex-wrap:wrap;
+    }
+
+    .project-links a{
+      text-decoration:none;
+      background:#2563eb;
+      color:white;
+      padding:10px 18px;
+      border-radius:8px;
+      transition:0.3s;
+    }
+
+    .project-links a:hover{
+      background:#1d4ed8;
+      transform:translateY(-2px);
+    }
+
+    /* CONTROLS */
+
+    .controls{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:15px;
+      margin-bottom:25px;
+    }
+
+    input,
+    select{
+      padding:12px;
+      border:none;
+      border-radius:8px;
+      background:#1e293b;
+      color:white;
+      font-size:15px;
+    }
+
+    button{
+      border:none;
+      padding:12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:bold;
+      transition:0.3s;
+      color:white;
+    }
+
+    .btn-add{
+      background:#22c55e;
+    }
+
+    .btn-add:hover{
+      background:#16a34a;
+    }
+
+    .btn-run{
+      background:#3b82f6;
+    }
+
+    .btn-run:hover{
+      background:#2563eb;
+    }
+
+    .btn-clear{
+      background:#ef4444;
+    }
+
+    .btn-clear:hover{
+      background:#dc2626;
+    }
+
+    /* TABLE */
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-bottom:30px;
+      overflow:hidden;
+      border-radius:10px;
+    }
+
+    th{
+      background:#1e293b;
+      padding:15px;
+      text-align:left;
+    }
+
+    td{
+      padding:15px;
+      border-bottom:1px solid #334155;
+    }
+
+    tr:hover{
+      background:#172033;
+    }
+
+    /* GANTT */
+
+    .gantt-container{
+      margin-top:20px;
+    }
+
+    .gantt-title{
+      margin-bottom:15px;
+      font-size:22px;
+    }
+
+    .gantt-chart{
+      display:flex;
+      flex-wrap:wrap;
+      gap:5px;
+    }
+
+    .gantt-block{
+      min-width:70px;
+      padding:15px;
+      text-align:center;
+      border-radius:8px;
+      font-weight:bold;
+      color:white;
+      animation:fadeIn 0.4s ease;
+    }
+
+    .time{
+      margin-top:8px;
+      font-size:12px;
+      opacity:0.8;
+    }
+
+    @keyframes fadeIn{
+      from{
+        transform:translateY(10px);
+        opacity:0;
+      }
+      to{
+        transform:translateY(0);
+        opacity:1;
+      }
+    }
+
+    .stats{
+      margin-top:30px;
+      background:#1e293b;
+      padding:20px;
+      border-radius:12px;
+      line-height:2;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- PROJECT CARD -->
+
+  <div class="project-card">
+
+    <div class="project-header">
+      <i class="fas fa-memory project-icon"></i>
+    </div>
+
+    <div class="project-body">
+
+      <div class="project-tags">
+        <span class="tag">OS</span>
+        <span class="tag">Scheduling</span>
+        <span class="tag">JavaScript</span>
+      </div>
+
+      <h2 class="project-title">Process Scheduler Visualizer</h2>
+
+      <p class="project-desc">
+        Interactive simulation of CPU scheduling algorithms including
+        FIFO and Round Robin with process queue visualization and Gantt chart.
+      </p>
+
+      <div class="project-links">
+        <a href="#">
+          <i class="fas fa-play"></i> Demo
+        </a>
+
+        <a href="#">
+          <i class="fab fa-github"></i> Source Code
+        </a>
+      </div>
+
+      <!-- CONTROLS -->
+
+      <div class="controls">
+
+        <input type="text" id="processName" placeholder="Process Name">
+
+        <input type="number" id="burstTime" placeholder="Burst Time">
+
+        <select id="algorithm">
+          <option value="fifo">FIFO</option>
+          <option value="rr">Round Robin</option>
+        </select>
+
+        <input type="number" id="quantum" placeholder="Quantum (RR)" value="2">
+
+        <button class="btn-add" onclick="addProcess()">
+          Add Process
+        </button>
+
+        <button class="btn-run" onclick="runScheduler()">
+          Run Scheduler
+        </button>
+
+        <button class="btn-clear" onclick="clearAll()">
+          Clear
+        </button>
+
+      </div>
+
+      <!-- PROCESS TABLE -->
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Process</th>
+            <th>Burst Time</th>
+          </tr>
+        </thead>
+
+        <tbody id="processTable"></tbody>
+
+      </table>
+
+      <!-- GANTT CHART -->
+
+      <div class="gantt-container">
+
+        <h3 class="gantt-title">CPU Scheduling Timeline</h3>
+
+        <div class="gantt-chart" id="ganttChart"></div>
+
+      </div>
+
+      <!-- STATS -->
+
+      <div class="stats" id="stats">
+        Average Waiting Time: 0 <br>
+        Average Turnaround Time: 0
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+let processes = [];
+
+const colors = [
+  "#3b82f6",
+  "#22c55e",
+  "#ef4444",
+  "#eab308",
+  "#8b5cf6",
+  "#ec4899",
+  "#06b6d4"
+];
+
+function addProcess(){
+
+  const name = document.getElementById("processName").value;
+  const burst = parseInt(document.getElementById("burstTime").value);
+
+  if(!name || !burst){
+    alert("Please enter valid process details");
+    return;
+  }
+
+  processes.push({
+    name,
+    burst
+  });
+
+  renderTable();
+
+  document.getElementById("processName").value = "";
+  document.getElementById("burstTime").value = "";
+}
+
+function renderTable(){
+
+  const table = document.getElementById("processTable");
+
+  table.innerHTML = "";
+
+  processes.forEach((p,index)=>{
+
+    table.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.burst}</td>
+      </tr>
+    `;
+  });
+}
+
+function runScheduler(){
+
+  const algorithm = document.getElementById("algorithm").value;
+
+  if(processes.length === 0){
+    alert("Add some processes first");
+    return;
+  }
+
+  if(algorithm === "fifo"){
+    runFIFO();
+  }
+  else{
+    runRoundRobin();
+  }
+}
+
+function runFIFO(){
+
+  const gantt = document.getElementById("ganttChart");
+  gantt.innerHTML = "";
+
+  let currentTime = 0;
+  let waitingTotal = 0;
+  let turnaroundTotal = 0;
+
+  processes.forEach((p,index)=>{
+
+    const waiting = currentTime;
+    const turnaround = waiting + p.burst;
+
+    waitingTotal += waiting;
+    turnaroundTotal += turnaround;
+
+    const block = document.createElement("div");
+
+    block.className = "gantt-block";
+
+    block.style.background = colors[index % colors.length];
+
+    block.innerHTML = `
+      ${p.name}
+      <div class="time">
+        ${currentTime} - ${currentTime + p.burst}
+      </div>
+    `;
+
+    gantt.appendChild(block);
+
+    currentTime += p.burst;
+  });
+
+  const avgWaiting = (waitingTotal / processes.length).toFixed(2);
+  const avgTurnaround = (turnaroundTotal / processes.length).toFixed(2);
+
+  updateStats(avgWaiting, avgTurnaround);
+}
+
+function runRoundRobin(){
+
+  const gantt = document.getElementById("ganttChart");
+  gantt.innerHTML = "";
+
+  const quantum = parseInt(document.getElementById("quantum").value);
+
+  if(!quantum || quantum <= 0){
+    alert("Enter valid quantum");
+    return;
+  }
+
+  let queue = processes.map(p => ({
+    ...p,
+    remaining: p.burst
+  }));
+
+  let currentTime = 0;
+
+  let completed = {};
+
+  while(queue.some(p => p.remaining > 0)){
+
+    for(let i=0; i<queue.length; i++){
+
+      let process = queue[i];
+
+      if(process.remaining <= 0) continue;
+
+      const executeTime = Math.min(quantum, process.remaining);
+
+      const block = document.createElement("div");
+
+      block.className = "gantt-block";
+
+      block.style.background =
+      colors[i % colors.length];
+
+      block.innerHTML = `
+        ${process.name}
+        <div class="time">
+          ${currentTime} - ${currentTime + executeTime}
+        </div>
+      `;
+
+      gantt.appendChild(block);
+
+      currentTime += executeTime;
+
+      process.remaining -= executeTime;
+
+      if(process.remaining === 0){
+        completed[process.name] = currentTime;
+      }
+    }
+  }
+
+  let waitingTotal = 0;
+  let turnaroundTotal = 0;
+
+  processes.forEach(p => {
+
+    const turnaround = completed[p.name];
+    const waiting = turnaround - p.burst;
+
+    waitingTotal += waiting;
+    turnaroundTotal += turnaround;
+  });
+
+  const avgWaiting =
+  (waitingTotal / processes.length).toFixed(2);
+
+  const avgTurnaround =
+  (turnaroundTotal / processes.length).toFixed(2);
+
+  updateStats(avgWaiting, avgTurnaround);
+}
+
+function updateStats(waiting, turnaround){
+
+  document.getElementById("stats").innerHTML = `
+    <strong>Average Waiting Time:</strong> ${waiting}<br>
+    <strong>Average Turnaround Time:</strong> ${turnaround}
+  `;
+}
+
+function clearAll(){
+
+  processes = [];
+
+  renderTable();
+
+  document.getElementById("ganttChart").innerHTML = "";
+
+  document.getElementById("stats").innerHTML = `
+    Average Waiting Time: 0 <br>
+    Average Turnaround Time: 0
+  `;
+}
+
+</script>
+
+</body>
+</html>
