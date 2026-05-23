@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Graph Algo Visualizer</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:#0f172a;
+      color:white;
+      min-height:100vh;
+      padding:40px 20px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+    }
+
+    .container{
+      width:100%;
+      max-width:1200px;
+    }
+
+    /* PROJECT CARD */
+
+    .project-card{
+      background:#111827;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:0 10px 30px rgba(0,0,0,0.4);
+      margin-bottom:30px;
+    }
+
+    .project-header{
+      height:140px;
+      background:linear-gradient(135deg,#2563eb,#7c3aed);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .project-icon{
+      font-size:60px;
+      color:white;
+    }
+
+    .project-body{
+      padding:25px;
+    }
+
+    .project-tags{
+      display:flex;
+      gap:10px;
+      margin-bottom:15px;
+      flex-wrap:wrap;
+    }
+
+    .tag{
+      background:#1e293b;
+      color:#38bdf8;
+      padding:6px 12px;
+      border-radius:20px;
+      font-size:13px;
+    }
+
+    .project-title{
+      font-size:28px;
+      margin-bottom:10px;
+    }
+
+    .project-desc{
+      color:#cbd5e1;
+      line-height:1.6;
+      margin-bottom:20px;
+    }
+
+    .project-links{
+      display:flex;
+      gap:15px;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    .project-links a{
+      text-decoration:none;
+      background:#2563eb;
+      color:white;
+      padding:10px 16px;
+      border-radius:8px;
+      transition:0.3s;
+      font-size:14px;
+    }
+
+    .project-links a:hover{
+      background:#1d4ed8;
+      transform:translateY(-2px);
+    }
+
+    /* CONTROLS */
+
+    .controls{
+      display:flex;
+      gap:15px;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:none;
+      padding:12px 20px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:15px;
+      font-weight:bold;
+      transition:0.3s;
+    }
+
+    .btn-primary{
+      background:#22c55e;
+      color:white;
+    }
+
+    .btn-primary:hover{
+      background:#16a34a;
+    }
+
+    .btn-danger{
+      background:#ef4444;
+      color:white;
+    }
+
+    .btn-danger:hover{
+      background:#dc2626;
+    }
+
+    /* GRID */
+
+    .grid{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+
+    .row{
+      display:flex;
+    }
+
+    .node{
+      width:25px;
+      height:25px;
+      border:1px solid #334155;
+      background:#1e293b;
+      transition:0.15s;
+    }
+
+    .node:hover{
+      background:#475569;
+    }
+
+    .start{
+      background:#22c55e !important;
+    }
+
+    .end{
+      background:#ef4444 !important;
+    }
+
+    .wall{
+      background:black !important;
+    }
+
+    .visited{
+      background:#38bdf8 !important;
+      animation:visit 0.2s;
+    }
+
+    .path{
+      background:yellow !important;
+      animation:pathAnim 0.2s;
+    }
+
+    @keyframes visit{
+      from{
+        transform:scale(0.3);
+        opacity:0.3;
+      }
+      to{
+        transform:scale(1);
+        opacity:1;
+      }
+    }
+
+    @keyframes pathAnim{
+      from{
+        transform:scale(0.5);
+      }
+      to{
+        transform:scale(1);
+      }
+    }
+
+    .info{
+      margin-bottom:15px;
+      color:#94a3b8;
+    }
+
+    @media(max-width:768px){
+      .node{
+        width:18px;
+        height:18px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- PROJECT CARD -->
+  <div class="project-card">
+
+    <div class="project-header">
+      <i class="fas fa-project-diagram project-icon"></i>
+    </div>
+
+    <div class="project-body">
+
+      <div class="project-tags">
+        <span class="tag">Algorithms</span>
+        <span class="tag">JavaScript</span>
+        <span class="tag">Pathfinding</span>
+      </div>
+
+      <h2 class="project-title">Graph Algo Visualizer</h2>
+
+      <p class="project-desc">
+        Interactive visualization of Dijkstra's shortest path algorithm.
+        Click on cells to create walls and visualize the shortest path.
+      </p>
+
+      <div class="project-links">
+        <a href="#">
+          <i class="fas fa-play"></i> Live Demo
+        </a>
+
+        <a href="#">
+          <i class="fab fa-github"></i> Source Code
+        </a>
+      </div>
+
+      <!-- CONTROLS -->
+
+      <div class="controls">
+        <button class="btn-primary" onclick="visualizeDijkstra()">
+          Visualize Dijkstra
+        </button>
+
+        <button class="btn-danger" onclick="resetGrid()">
+          Clear Grid
+        </button>
+      </div>
+
+      <div class="info">
+        🟢 Start &nbsp;&nbsp;
+        🔴 End &nbsp;&nbsp;
+        ⚫ Wall &nbsp;&nbsp;
+        🔵 Visited &nbsp;&nbsp;
+        🟡 Shortest Path
+      </div>
+
+      <!-- GRID -->
+
+      <div id="grid" class="grid"></div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+const ROWS = 18;
+const COLS = 40;
+
+const START_ROW = 3;
+const START_COL = 3;
+
+const END_ROW = 12;
+const END_COL = 32;
+
+let grid = [];
+
+function createGrid() {
+
+  grid = [];
+
+  const gridElement = document.getElementById("grid");
+  gridElement.innerHTML = "";
+
+  for(let row = 0; row < ROWS; row++){
+
+    const rowElement = document.createElement("div");
+    rowElement.className = "row";
+
+    const currentRow = [];
+
+    for(let col = 0; col < COLS; col++){
+
+      const node = {
+        row,
+        col,
+        distance: Infinity,
+        visited: false,
+        isWall: false,
+        previousNode: null
+      };
+
+      currentRow.push(node);
+
+      const cell = document.createElement("div");
+      cell.className = "node";
+
+      if(row === START_ROW && col === START_COL){
+        cell.classList.add("start");
+      }
+
+      if(row === END_ROW && col === END_COL){
+        cell.classList.add("end");
+      }
+
+      cell.id = `node-${row}-${col}`;
+
+      cell.addEventListener("click", () => toggleWall(row,col));
+
+      rowElement.appendChild(cell);
+    }
+
+    grid.push(currentRow);
+    gridElement.appendChild(rowElement);
+  }
+}
+
+function toggleWall(row,col){
+
+  if(
+    (row === START_ROW && col === START_COL) ||
+    (row === END_ROW && col === END_COL)
+  ){
+    return;
+  }
+
+  const node = grid[row][col];
+  node.isWall = !node.isWall;
+
+  const element = document.getElementById(`node-${row}-${col}`);
+
+  element.classList.toggle("wall");
+}
+
+function resetGrid(){
+  createGrid();
+}
+
+function getAllNodes(){
+
+  const nodes = [];
+
+  for(const row of grid){
+    for(const node of row){
+      nodes.push(node);
+    }
+  }
+
+  return nodes;
+}
+
+function sortNodes(nodes){
+  nodes.sort((a,b)=>a.distance-b.distance);
+}
+
+function getNeighbors(node){
+
+  const neighbors = [];
+  const {row,col} = node;
+
+  if(row > 0) neighbors.push(grid[row-1][col]);
+  if(row < ROWS-1) neighbors.push(grid[row+1][col]);
+  if(col > 0) neighbors.push(grid[row][col-1]);
+  if(col < COLS-1) neighbors.push(grid[row][col+1]);
+
+  return neighbors.filter(neighbor => !neighbor.visited);
+}
+
+function updateNeighbors(node){
+
+  const neighbors = getNeighbors(node);
+
+  for(const neighbor of neighbors){
+
+    neighbor.distance = node.distance + 1;
+    neighbor.previousNode = node;
+  }
+}
+
+function dijkstra(){
+
+  const startNode = grid[START_ROW][START_COL];
+  const finishNode = grid[END_ROW][END_COL];
+
+  startNode.distance = 0;
+
+  const unvisitedNodes = getAllNodes();
+
+  const visitedNodesInOrder = [];
+
+  while(unvisitedNodes.length){
+
+    sortNodes(unvisitedNodes);
+
+    const closestNode = unvisitedNodes.shift();
+
+    if(closestNode.isWall) continue;
+
+    if(closestNode.distance === Infinity){
+      return visitedNodesInOrder;
+    }
+
+    closestNode.visited = true;
+
+    visitedNodesInOrder.push(closestNode);
+
+    if(closestNode === finishNode){
+      return visitedNodesInOrder;
+    }
+
+    updateNeighbors(closestNode);
+  }
+}
+
+function getShortestPath(){
+
+  const nodes = [];
+
+  let currentNode = grid[END_ROW][END_COL];
+
+  while(currentNode !== null){
+    nodes.unshift(currentNode);
+    currentNode = currentNode.previousNode;
+  }
+
+  return nodes;
+}
+
+function visualizeDijkstra(){
+
+  // reset previous animations
+
+  for(let row=0; row<ROWS; row++){
+    for(let col=0; col<COLS; col++){
+
+      const cell = document.getElementById(`node-${row}-${col}`);
+
+      cell.classList.remove("visited");
+      cell.classList.remove("path");
+
+      grid[row][col].distance = Infinity;
+      grid[row][col].visited = false;
+      grid[row][col].previousNode = null;
+    }
+  }
+
+  const visitedNodes = dijkstra();
+
+  const shortestPath = getShortestPath();
+
+  animateVisited(visitedNodes, shortestPath);
+}
+
+function animateVisited(visitedNodes, shortestPath){
+
+  for(let i=0; i<=visitedNodes.length; i++){
+
+    if(i === visitedNodes.length){
+
+      setTimeout(()=>{
+        animatePath(shortestPath);
+      },10*i);
+
+      return;
+    }
+
+    setTimeout(()=>{
+
+      const node = visitedNodes[i];
+
+      if(
+        (node.row === START_ROW && node.col === START_COL) ||
+        (node.row === END_ROW && node.col === END_COL)
+      ){
+        return;
+      }
+
+      document
+        .getElementById(`node-${node.row}-${node.col}`)
+        .classList.add("visited");
+
+    },10*i);
+  }
+}
+
+function animatePath(nodes){
+
+  for(let i=0; i<nodes.length; i++){
+
+    setTimeout(()=>{
+
+      const node = nodes[i];
+
+      if(
+        (node.row === START_ROW && node.col === START_COL) ||
+        (node.row === END_ROW && node.col === END_COL)
+      ){
+        return;
+      }
+
+      document
+        .getElementById(`node-${node.row}-${node.col}`)
+        .classList.add("path");
+
+    },50*i);
+  }
+}
+
+createGrid();
+
+</script>
+
+</body>
+</html>
